@@ -6,6 +6,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+//notice me! the short * arr should get by with & so it can change propley, shit is broken  with out that
+//סעיף ב' שבור כי לא מצליח לעדכן את המערך של האפשרויות אחרי ההורדה, אנסה שוב מחר
+
 typedef struct _Array
 {
 	short *arr;
@@ -18,8 +21,74 @@ int OneStage(short board[][9], Array ***possibilities,int *x, int *y);
 Array *checkParentBox(int row, int col, short arr[][9]);
 void printLine();
 
-//possibleDigits helper, basiclly runs on the whole checking logic
-Array *checkParentBox(int row, int col, short arr[][9])
+int removeFromArr(short *arr,short size,int toRm){
+	int index=-1;
+	for (int i = 0; i < size; i++)
+	{
+		if(arr[i]==toRm){
+			index=i;
+		}
+	}
+	if(index!=-1){
+		for (int j = index; j < size; j++)
+		{
+			arr[j]=arr[j+1];
+			
+		}
+
+		arr = (short *)realloc(arr, (size - 1) * sizeof(int));
+		printf("test %d")
+	}else{
+		return -1;
+	}
+	return size-1;
+}
+
+void removePossibilitiesFromSquare(int row, int col, int possToRmv, Array ***possibilities)
+{
+	for (int r = row - (row % 3); r < 3; r++)
+	{
+		for (int c = col - (col % 3); c < 3; c++)
+		{
+			possibilities[r][c]->size = removeFromArr(possibilities[r][c]->arr, possibilities[r][c]->size, possToRmv);
+		}
+	}
+}
+
+void removePossibilitiesFromCol(int col, int possToRmv, Array ***possibilities){	
+		for (int r =0; r < 9; r++)
+		{
+			
+			possibilities[r][col]->size= removeFromArr(possibilities[r][col]->arr, possibilities[r][col]->size, possToRmv);
+		}
+}
+
+int OneStage(short board[][9], Array ***possibilities, int *x, int *y)
+{
+	printf("before test %d\n", possibilities[3][0]->size);
+
+	for (int i = 0; i < 9; i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			if(board[i][j]==-1){
+				if(possibilities[i][j]->size==1){
+					board[i][j] = possibilities[i][j]->arr[0];
+					removePossibilitiesFromSquare(i, j, board[i][j], possibilities);
+					// removePossibilitiesFromCol(j,board[i][j],possibilities);
+
+				}
+			}
+		}
+		
+	}
+
+	printf("after test %d\n", possibilities[3][0]->size);
+		sudokoPrintBoard(board);
+}
+
+	//possibleDigits helper, basiclly runs on the whole checking logic
+	Array *checkParentBox(int row, int col, short arr[][9])
 {
 
 		//note:everytime i change it to -1 its to mark the num in the temparr as unworthy to return
@@ -214,22 +283,25 @@ void main()
        getchar();
 
        possible_solutions = PossibleDigits(board);
+	   int x,y;
 
-	//some other shit i am not responsible to 
+	   OneStage(board, possible_solutions,&x,&y);
 
-    //    if (FillBoard(board, possible_solutions) == -1)
+	   //some other shit i am not responsible to
 
-    //          printf("User's selections led to duplications\n");
+	   //    if (FillBoard(board, possible_solutions) == -1)
 
-    //    else
+	   //          printf("User's selections led to duplications\n");
 
-    //    {
+	   //    else
 
-    //          sudokoPrintBoard(board);
+	   //    {
 
-    //          printf("Board filled successfully\n");
+	   //          sudokoPrintBoard(board);
 
-    //    }
+	   //          printf("Board filled successfully\n");
+
+	   //    }
 
  
 
