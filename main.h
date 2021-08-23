@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #define FINISH_NOT 0
 #define SUCCESS_FINISH 1
 #define FINISH_FAILURE -1

@@ -1,28 +1,13 @@
 //47 till infinity
 #include "main.h"
-// #define _CRT_SECURE_NO_WARNINGS
-// #include <stdio.h>
-// #include <stdbool.h>
-// #include <string.h>
-// #include <stdlib.h>
-// #define FINISH_NOT 0
-// #define SUCCESS_FINISH 1
-// #define FINISH_FAILURE -1
 
-//notice me! the short * arr should get by with & so it can change propley, shit is broken  with out that
-//סעיף ב' שבור כי לא מצליח לעדכן את המערך של האפשרויות אחרי ההורדה, אנסה שוב מחר
-
-// typedef struct _Array
-// {
-// 	short *arr;
-// 	unsigned short size;
-// } Array;
-
-// Array ***PossibleDigits(short sudokuBoard[][9]);
-// void sudokoPrintBoard(short board[][9]);
-// int OneStage(short board[][9], Array ***possibilities,int *x, int *y);
-// Array *checkParentBox(int row, int col, short arr[][9]);
-// void printLine();
+//TO DO LIST
+//GET SHIT TO OTHER FILES,MAKE IT NICE LOOKING  []
+//MEMORY ALLOCTAION TESTS                       []
+//REMOVE USLESS PRINTF                          []
+//ADD DEFINE VAR TO PRINT EXTRA STUFF LIKE STATS[]
+//RE-THINK YOU LIFE DECISIONS THAT GOT YOU HERE []
+//FINISH THE GOD DAMN THING                     []
 
 void checkMemoryAlloc(Array *arr, char *msg)
 {
