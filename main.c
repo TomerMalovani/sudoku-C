@@ -1,6 +1,7 @@
 //47 till infinity
 #include "main.h"
-
+#include "board_funcs.c"
+// #include "board_funcs.c"
 //TO DO LIST
 //GET SHIT TO OTHER FILES,MAKE IT NICE LOOKING  []
 //MEMORY ALLOCTAION TESTS                       []
@@ -48,14 +49,14 @@ int removePossibilitiesFromSquare(int row, int col, int possToRmv, Array ***poss
 
 		for (int t = 0; t < 3; t++)
 		{
-			
-			int r = k + startRow;
+		
+			 int r = k + startRow;
 			int c = t + startCol;
 			if(board[r][c] == possToRmv && (r!=row || c!=col)){
 				printf("org [%d,%d] bad copy [%d,%d]\n",row,col,r,c); 
 				return -1;
 			}
-			if ((possibilities[r][c]->size) > 0 && possibilities[r][c]->size < 9)
+			if ((possibilities[r][c]->size) > 0)
 				removeFromArr(possibilities[r][c], possibilities[r][c]->size, possToRmv);
 		}
 	}
@@ -68,6 +69,8 @@ int removePossibilitiesFromCol(int row, int col, int possToRmv, Array ***possibi
 	for (int k = 0; k < 9; k++)
 	{
 		if (board[k][col] == possToRmv && k != row){
+			printf("bad row %d [%d.%d]\n", possToRmv, k, col);
+
 			return -1;
 		}
 			//remove bad numbers from all items in row
@@ -77,6 +80,8 @@ int removePossibilitiesFromCol(int row, int col, int possToRmv, Array ***possibi
 		{
 			if (board[row][t] == possToRmv && t != col)
 			{
+				printf("bad col %d [%d.%d]\n", possToRmv, row, t);
+
 				return -1;
 			}
 			//remove bad numbers from all items in col
@@ -84,6 +89,7 @@ int removePossibilitiesFromCol(int row, int col, int possToRmv, Array ***possibi
 				 removeFromArr(possibilities[row][t], possibilities[row][t]->size, possToRmv);		
 		}
 	}
+	return 0;
 }
 
 int OneStage(short board[][9], Array ***possibilities, int *x, int *y)
@@ -116,8 +122,6 @@ int OneStage(short board[][9], Array ***possibilities, int *x, int *y)
 				}
 		}
 	
-		
-		
 	}
 	for (int b = 0; b < 9; b++)
 	{
@@ -199,11 +203,7 @@ Array *checkParentBox(int row, int col, short arr[][9])
 				sizeCounter++;
 			}
 		}
-		
-
 				newShortArr->size = sizeCounter;
-
-				//note line 57
 				newShortArr->arr = (short *)malloc(sizeof(short) * sizeCounter);
 			
 				int insertCounter = 0;
@@ -299,6 +299,8 @@ Array *checkParentBox(int row, int col, short arr[][9])
 					PossibleDigits[i][j] = checkParentBox(i, j, sudokuBoard);
 	}
 }
+
+
 return PossibleDigits;
 }
 
@@ -328,7 +330,20 @@ void showPossibilities(Array ***possibilities,int x,int y){
 		printf("%d)%d\n", i,possibilities[x][y]->arr[i]);
 	}
 	printf("pick one\n");
-	
+}
+
+int updatePossibilitiesViaCoor(Array ***possibilities,short board[][9],int x,int y){
+	if (removePossibilitiesFromSquare(x, y, board[x][y], possibilities, board) == -1)
+	{
+		return FINISH_FAILURE;
+	}
+	else if (removePossibilitiesFromCol(x, y, board[x][y], possibilities, board) == -1)
+	{
+		return FINISH_FAILURE;
+	}
+	else{
+		return 0;
+	}
 }
 
 int FillBoard(short board[][9], Array ***possibilities)
@@ -354,55 +369,114 @@ int FillBoard(short board[][9], Array ***possibilities)
 	return res;
 }
 
+APLAYERLST *initPlayerList()
+{
+	APLAYERLST *newPlayerList = (APLAYERLST *)malloc(sizeof(APLAYERLST));
+	newPlayerList->head = newPlayerList->tail = NULL;
+	newPlayerList->size=0;
+}
+
+bool isEmptyDList(APLAYERLST *lst)
+{
+	return lst->head == NULL;
+}
+
+void insertNodeToEndDList(APLAYERLST *lst, APLAYERNOD *tail)
+{
+	if (isEmptyDList(lst))
+	{
+		tail->next = tail->prev = NULL;
+		lst->head = lst->tail = tail;
+	}
+	else
+	{
+		tail->prev = lst->tail;
+		tail->next = NULL;
+		lst->tail->next = tail;
+		lst->tail = tail;
+	}
+}
+
+APLAYERNOD *createNewAPlayerListNode(PLAYER * data, APLAYERNOD *next, APLAYERNOD *prev)
+{
+	APLAYERNOD *res;
+	res = (APLAYERNOD *)malloc(sizeof(APLAYERNOD));
+	res->data = data;
+	res->next = next;
+	res->prev = prev;
+	return res;
+}
+
+void insertDataToActivePlayerEndDList(APLAYERLST *lst, PLAYER *data)
+{
+	APLAYERNOD *newTail;
+	newTail = createNewAPlayerListNode(data, NULL, NULL);
+	insertNodeToEndDList(lst, newTail);
+}
+
+APLAYERLST *getPlayers()
+{
+	char line[100];
+	int playerAmount;
+	printf("how many player are we talking about?");
+	scanf("%d", &playerAmount);
+	printf("press enter when ready to name the players\n");
+
+	getchar();
+	APLAYERLST *newPlayerList = initPlayerList();
+	for (int i = 0; i < playerAmount; i++)
+	{
+
+		printf("name of player %d?\n", i + 1);
+		gets(line);
+		PLAYER *newPlayer = (PLAYER *)malloc(sizeof(PLAYER));
+
+		newPlayer->name = strdup(line);
+		printf("board of %s\n", newPlayer->name);
+		newPlayer->board = createBoard();
+		sudokoPrintBoard(newPlayer->board->coors);
+		insertDataToActivePlayerEndDList(newPlayerList, newPlayer);
+		}
+		APLAYERNOD *curr = newPlayerList->head;
+		for (size_t i = 0; i < playerAmount; i++)
+		{
+			printf("name %s possible %d\n ", curr->data->name, curr->data->board->PossibleDigits[0][0]->size);
+			curr=curr->next;
+		}
+		
+	}
+
 void main()
 {
-       short board[9][9] =
+	srand(time(NULL));
+	getPlayers();
 
-       { 5,-1, 4,-1, 7,-1,-1, 1,-1,
-
-        6,-1, 2, 1,-1,-1, 3,-1,-1,
-
-        1,-1, 8,-1, 4,-1,-1, 6,-1,
-
-       -1, 5,-1,-1, 6,-1,-1, 2,-1,
-
-       -1, 2,-1, 8,-1, 3,-1,-1,-1,
-
-       -1,-1,-1,-1,-1, 4,-1, 5, 6,
-
-       -1, 6, 1, 5, 3, 7, 2, 8, 4,
-
-       -1, 8, 7,-1, 1, 9,-1, 3,-1,
-
-       -1,-1,-1, 2, 8,-1,-1,-1, 9 };
-	   //end should be 9
 
  
 
-       Array*** possible_solutions;
+    //    Array*** possible_solutions;
 
  
 
-       printf("Initial board\n");
+    //    printf("Initial board\n");
 
-       sudokoPrintBoard(board);
+    //    sudokoPrintBoard(board);
 
  
 
-       printf("Press enter to start playing...\n");
+    //    printf("Press enter to start playing...\n");
 
-       getchar();
+    //    getchar();
 
-	   possible_solutions = PossibleDigits(board);
+	//    possible_solutions = PossibleDigits(board);
 	 
 	//    printBoardStats(board, possible_solutions);
 		//   printBoardStats(board, possible_solutions);
 
 		  //some other shit i am not responsible to
 
-		     if (FillBoard(board, possible_solutions) == -1){
-				   printf("User's selections led to duplications\n");
-}
+	
+// }
 // printBoardStats(board, possible_solutions);
 
 //    else
