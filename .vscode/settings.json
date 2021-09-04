@@ -16,6 +16,7 @@
   "C_Cpp_Runner.warningsAsError": false,
   "files.associations": {
     "main.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "string.h": "c"
   }
 }

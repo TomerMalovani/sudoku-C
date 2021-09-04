@@ -1,3 +1,8 @@
+ // Some old MinGW/CYGWIN distributions don't define this:
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004 12
+
+#endif
 
 #define H
 
@@ -6,12 +11,18 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #define FINISH_NOT 0
+#define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+
 #define SUCCESS_FINISH 1
 #define FINISH_FAILURE -1
 
-typedef struct _Array
+	 typedef struct _Array
 {
 	short *arr;
 	unsigned short size;
@@ -44,6 +55,7 @@ typedef struct SQList
 typedef struct board
 {
 	 short   coors[9][9];
+	 int numOfValSqr;
 	 Array ***PossibleDigits;
 } BOARD;
 
@@ -69,6 +81,21 @@ typedef struct APLAYERLST
 } APLAYERLST;
 
 
+//==============================================================================
+typedef struct WPLAYERNOD
+{
+	PLAYER *data;
+	struct WPLAYERNOD *next;
+	struct WPLAYERNOD *prev;
+} WPLAYERNOD;
+
+typedef struct WPLAYERLST
+{
+	WPLAYERNOD *head;
+	WPLAYERNOD *tail;
+	int size;
+} WPLAYERLST;
+
 //-----------------------------------------------------------------------------
 typedef struct DPLAYERNOD
 {
@@ -85,7 +112,24 @@ typedef struct DPLAYERLST
 } DPLAYERLST;
 
 //-----------------------------------------------------------------------------
-void checkMemoryAlloc(Array *arr, char *msg);
+typedef struct PlayerTreeNode
+{
+	APLAYERNOD *data;
+	struct PlayerTreeNode *right;
+	struct PlayerTreeNode *left;
+} PLAYER_TREE_NODE;
+
+typedef struct PlayerTree
+{
+	PLAYER_TREE_NODE * root;
+	int size;
+} PLAYER_TREE;
+
+//-----------------------------------------------------------------------------
+
+void checkMemoryAlloc(void *arr);
+void freeTreeHelper(PLAYER_TREE_NODE *node);
+void freeTree(PLAYER_TREE tr);
 
 Array ***PossibleDigits(short sudokuBoard[][9]);
 int OneStage(short board[][9], Array ***possibilities, int *x, int *y);
@@ -114,3 +158,18 @@ BOARD *initBoard();
 //-----------------------------------------------------------------------------
 
 APLAYERLST *getPlayers();
+
+//============================================================================
+void insertDataToActivePlayerEndDList(APLAYERLST *lst, PLAYER *data);
+void insertNodeToEndDList(APLAYERLST *lst, APLAYERNOD *tail);
+int isEmptyList(APLAYERLST *lst);
+APLAYERNOD *createNewAPlayerListNode(PLAYER *data, APLAYERNOD *next, APLAYERNOD *prev);
+APLAYERNOD **arrayFromList(APLAYERLST *root, int *size);
+
+//-----------------------------------------------------------------------------
+void merge(APLAYERNOD **Arr, int start, int mid, int end);
+void mergeSortPlayers(APLAYERNOD **playerArr, int start, int end);
+
+//------------------------------
+void removeActivePlayerFromList(APLAYERNOD *curr, APLAYERLST *lst);
+void gameFlowInOrder_rec(PLAYER_TREE_NODE *t, APLAYERLST *lst, APLAYERLST *winningPlayersList);

@@ -98,6 +98,7 @@ BOARD *createBoard()
 	SQRLIST *sqlst = initSqrList();
 	SQLNODE *curr = sqlst->head;
 	printf("amount of good sqr %d\n", vaildSqrCount);
+	board->numOfValSqr = vaildSqrCount;
 	board->PossibleDigits = PossibleDigits(board->coors);
 	for (int i = 0; i < vaildSqrCount; i++)
 	{
@@ -116,7 +117,8 @@ BOARD *createBoard()
 			// return NULL;
 		}
 	}
+	sudokoPrintBoard(board->coors);
+	// printBoardStats(board->coors, board->PossibleDigits);
 
 	return board;
-	// printBoardStats(board->coors, board->PossibleDigits);
 }
